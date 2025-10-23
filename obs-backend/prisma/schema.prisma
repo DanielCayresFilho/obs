@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StockType {
+  sale
+  intern
+}
+
+enum MovementType {
+  input
+  output
+}
+
+enum AppointmentStatus {
+  done
+  waiting
+  canceled
+}
+
+enum commandStatus {
+  waiting
+  open
+  closed
+}
+
+enum PaymentType {
+  pix
+  money
+  debit
+  credit
+  credit2x
+  credit3x
+  credit4x
+  credit5x
+  credit6x
+}
+
+enum PaymentStatus {
+  paid
+  unpaid
+}
+
+enum BudgetStatus {
+  pending
+  approved
+  rejected
+  converted
+}
+
+model Users {
+  id Int @id @default(autoincrement())
+  username String @unique
+  name String 
+  password String
+  email String @unique
+  birthday DateTime @db.Date
+  userPicture String?
+  createdAt DateTime @default(now())
+
+  @@index([username, email, createdAt])
+}
+
+model Clients {
+  id Int @id @default(autoincrement())
+  name String
+  phone String
+  birthday DateTime @db.Date
+  instagram String
+  clientPicture String?
+  createdAt DateTime @default(now())
+  
+  @@index([name, phone, createdAt])
+}
+
+model Sales {
+  id Int @id @default(autoincrement())
+  idStock Int
+  stock Stock @relation(fields: [idStock], references: [id])
+  nameStock String
+  quantity Int
+  unitPrice Decimal
+  totalPrice Decimal
+  paymentType PaymentType @default(money)
+  paymentStatus PaymentStatus @default(unpaid)
+  clientId Int?
+  clientName String?
+  createdAt DateTime @default(now())
+  
+  stockMovement StockMovement?
+  
+  @@index([nameStock, createdAt])
+}
+
+model Stock {
+  id Int @id @default(autoincrement())
+  name String
+  type StockType @default(intern)
+  price Decimal 
+  quantity Int
+  length Decimal 
+  usable Decimal
+  category String
+  createdAt DateTime @default(now())
+  
+  sales Sales[]
+  
+  @@index([name, type, createdAt])
+}
+
+model StockMovement {
+  id Int @id @default(autoincrement())
+  idStock Int
+  nameStock String
+  cost Decimal 
+  used Decimal
+  quantity Int?
+  length Decimal?
+  stockType StockType
+  operational Boolean @default(false) 
+  movementType MovementType @default(output) // alterado default
+  createdAt DateTime @default(now())
+  commandId Int?
+  command commands? @relation(fields: [commandId], references: [id])
+  
+  saleId Int? @unique
+  sale Sales? @relation(fields: [saleId], references: [id])
+  
+  @@index([nameStock, operational, createdAt])
+}
+
+model procedures {
+  id Int @id @default(autoincrement())
+  procedureName String
+  procedureType String
+  duration Int
+  procedurePrice Decimal 
+  createdAt DateTime @default(now())
+
+  @@index([procedureType, createdAt])
+}
+
+model appointments {
+  id Int @id @default(autoincrement())
+  procedure String
+  appointmentDate DateTime
+  createdAt DateTime @default(now())
+  appointment AppointmentStatus @default(waiting)
+  appointmentPicture String?
+
+
+  commandId Int
+  command commands @relation(fields: [commandId], references: [id])
+  @@index([procedure, appointmentDate])
+} 
+
+model commands {
+  id Int @id @default(autoincrement())
+  commandName String
+  idUser Int
+  userResponsibility String
+
+  idClient Int
+  clienteName String
+
+  appointments appointments[]
+  stockMovements StockMovement[]
+  
+  discount Decimal @default(0)
+  totalPrice Decimal @default(0)
+  paymentType PaymentType? @default(money)
+
+  commandStatus commandStatus @default(waiting)
+  createdAt DateTime @default(now())
+
+  @@index([userResponsibility, createdAt])
+
+}
+
+model financials {
+  id Int @id @default(autoincrement())
+
+  accountName String
+  price Decimal
+  vencimentDay DateTime @db.Date
+  paymentStatus PaymentStatus
+}
+
+model budgets {
+  id Int @id @default(autoincrement())
+  budgetName String
+  idClient Int
+  clientName String
+  idUser Int
+  userResponsibility String
+  description String?
+  procedures String
+  estimatedPrice Decimal @default(0)
+  discount Decimal @default(0)
+  finalPrice Decimal @default(0)
+  status BudgetStatus @default(pending)
+  validityDate DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  linkedCommandId Int?
+
+  @@index([clientName, status, createdAt])
+}

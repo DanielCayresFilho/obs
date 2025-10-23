@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15
+    container_name: obs-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cayres
+      POSTGRES_PASSWORD: s3S4.B4\n4NA
+      POSTGRES_DB: obs_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: obs-backend
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: npm run start:dev
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: obs-pgadmin
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
