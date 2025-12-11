@@ -1,72 +1,54 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-/*import { Express } from 'express'; */
-import { extname } from 'path';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 @Injectable()
 export class StorageService {
-  private readonly s3Client: S3Client;
-  private readonly bucketName: string;
-  private readonly endpoint: string;
+  private readonly uploadsDir: string;
+  private readonly baseUrl: string;
 
   constructor(private configService: ConfigService) {
-    // Pega as variáveis do .env
-    const region = this.configService.get<string>('B2_REGION');
-    const endpoint = this.configService.get<string>('B2_ENDPOINT');
-    const bucketName = this.configService.get<string>('B2_BUCKET_NAME');
-    const accessKeyId = this.configService.get<string>('B2_APPLICATION_KEY_ID');
-    const secretAccessKey =
-      this.configService.get<string>('B2_APPLICATION_KEY');
+    // Diretório onde os arquivos serão salvos
+    this.uploadsDir = join(process.cwd(), 'uploads');
 
-    // Verifica se todas as variáveis necessárias existem
-    if (
-      !region ||
-      !endpoint ||
-      !bucketName ||
-      !accessKeyId ||
-      !secretAccessKey
-    ) {
-      throw new InternalServerErrorException(
-        'Storage environment variables are not configured correctly.',
-      );
+    // URL base para acessar os arquivos
+    const port = this.configService.get<string>('PORT') || '3000';
+    this.baseUrl = `http://localhost:${port}/uploads`;
+
+    // Cria o diretório de uploads se não existir
+    this.ensureUploadsDirExists();
+  }
+
+  private async ensureUploadsDirExists() {
+    if (!existsSync(this.uploadsDir)) {
+      await mkdir(this.uploadsDir, { recursive: true });
     }
-
-    // Após a verificação, o TypeScript sabe que os valores são 'string'
-    // e permite a atribuição sem erros.
-    this.endpoint = endpoint;
-    this.bucketName = bucketName;
-
-    // A criação do S3Client também funcionará sem erros de tipo.
-    this.s3Client = new S3Client({
-      endpoint: this.endpoint,
-      region: region,
-      credentials: {
-        accessKeyId: accessKeyId,
-        secretAccessKey: secretAccessKey,
-      },
-    });
   }
 
   async uploadFile(
     file: Express.Multer.File,
     destination: string,
   ): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: destination,
-      Body: file.buffer,
-      ACL: 'public-read',
-      ContentType: file.mimetype,
-    });
-
     try {
-      await this.s3Client.send(command);
-      const endpointDomain = this.endpoint.replace('https://', '');
-      const publicUrl = `https://${this.bucketName}.${endpointDomain}/${destination}`;
+      // Cria o caminho completo do arquivo
+      const filePath = join(this.uploadsDir, destination);
+
+      // Cria os subdiretórios se necessário (ex: uploads/users/, uploads/clients/)
+      const directory = join(this.uploadsDir, destination.split('/')[0]);
+      if (!existsSync(directory)) {
+        await mkdir(directory, { recursive: true });
+      }
+
+      // Salva o arquivo no sistema de arquivos local
+      await writeFile(filePath, file.buffer);
+
+      // Retorna a URL pública do arquivo
+      const publicUrl = `${this.baseUrl}/${destination}`;
       return publicUrl;
     } catch (error) {
-      throw new Error(`Failed to upload file to B2: ${error}`);
+      throw new Error(`Failed to upload file locally: ${error}`);
     }
   }
 }

@@ -43,3 +43,6 @@ prisma/*.db-journal
 *.tmp
 temp/
 .cache/
+
+# Uploads
+uploads/

@@ -18,7 +18,9 @@
       "Bash(find src/views -name \"*.vue\" -exec grep -l \"div2 img\" {} ;)",
       "Bash(cat obs-backend/package.json)",
       "Bash(cat obs-frontend/package.json)",
-      "Bash(cat /home/danielcayres/Documentos/ISOBS/obs-frontend/.env)"
+      "Bash(cat /home/danielcayres/Documentos/ISOBS/obs-frontend/.env)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
