@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 <div class="parent">
 
     <div class="div1">
@@ -455,6 +455,7 @@ div {
 </style>
 
 <script setup>
+import { API_BASE_URL } from '@/config/api';
 import Sidebar from '@/components/Sidebar.vue';
 import NewBudgetModal from '@/components/NewBudgetModal.vue';
 import ViewBudgetModal from '@/components/ViewBudgetModal.vue';
@@ -513,7 +514,7 @@ export default {
           throw new Error('Token de autenticação não encontrado');
         }
 
-        const response = await fetch('http://localhost:3000/budgets', {
+        const response = await fetch(`${API_BASE_URL}/budgets`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

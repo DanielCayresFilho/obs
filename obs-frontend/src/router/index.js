@@ -8,6 +8,7 @@ import ProceduresView from '@/views/ProceduresView.vue'
 import FinancialsView from '@/views/FinancialsView.vue'
 import StockView from '@/views/StockView.vue'
 import BudgetsView from '@/views/BudgetsView.vue'
+import { API_BASE_URL } from '@/config/api'
 
 const routes = [
   {
@@ -82,7 +83,7 @@ async function isTokenValid(token) {
 
   try {
     // Faz uma requisição para verificar se o token é válido
-    const response = await fetch('http://localhost:3000/auth/validate', {
+    const response = await fetch(`${API_BASE_URL}/auth/validate`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 <div class="parent">
     
     <div class="div1">
@@ -484,6 +484,7 @@
 </style>
 
 <script setup>
+import { API_BASE_URL } from '@/config/api';
 import Sidebar from '@/components/Sidebar.vue';
  import NewProcedureModal from '@/components/NewProcedureModal.vue';
  import EditProcedureModal from '@/components/EditProcedureModal.vue';
@@ -556,7 +557,7 @@ export default {
           throw new Error('Token de autenticação não encontrado');
         }
 
-        const response = await fetch('http://localhost:3000/procedures', {
+        const response = await fetch(`${API_BASE_URL}/procedures`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

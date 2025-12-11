@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 <div class="parent">
     
     <div class="div1">
@@ -771,6 +771,7 @@ td {
 </style>
 
 <script setup>
+import { API_BASE_URL } from '@/config/api';
 import Sidebar from '@/components/Sidebar.vue';
 import NewFinancialModal from '@/components/NewFinancialModal.vue';
 import EditFinancialModal from '@/components/EditFinancialModal.vue';
@@ -878,7 +879,7 @@ export default {
           fetch(`http://localhost:3000/analytics/commands-value?userid=${userId}&startdate=${this.startDate}&enddate=${this.endDate}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('http://localhost:3000/analytics/financials-value', {
+          fetch(`${API_BASE_URL}/analytics/financials-value`, {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);
@@ -901,7 +902,7 @@ export default {
     async fetchFinancials() {
       try {
         const token = localStorage.getItem('jwt_token');
-        const response = await fetch('http://localhost:3000/financials', {
+        const response = await fetch(`${API_BASE_URL}/financials`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -916,7 +917,7 @@ export default {
     async fetchSales() {
       try {
         const token = localStorage.getItem('jwt_token');
-        const response = await fetch('http://localhost:3000/sales', {
+        const response = await fetch(`${API_BASE_URL}/sales`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -931,7 +932,7 @@ export default {
     async fetchMovements() {
       try {
         const token = localStorage.getItem('jwt_token');
-        const response = await fetch('http://localhost:3000/stock-movement', {
+        const response = await fetch(`${API_BASE_URL}/stock-movement`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 <div class="parent">
     
     <div class="div1">
@@ -469,6 +469,7 @@ div {
 </style>
 
 <script setup>
+import { API_BASE_URL } from '@/config/api';
 import Sidebar from '@/components/Sidebar.vue';
 import NewAppointmentModal from '@/components/NewAppointmentModal.vue';
  import UpdateAppointmentModal from '@/components/UpdateAppointmentModal.vue';
@@ -530,8 +531,8 @@ export default {
 
         // Buscar appointments e commands em paralelo
         const [appointmentsRes, commandsRes] = await Promise.all([
-          fetch('http://localhost:3000/appointments', { headers }),
-          fetch('http://localhost:3000/commands', { headers })
+          fetch(`${API_BASE_URL}/appointments`, { headers }),
+          fetch(`${API_BASE_URL}/commands`, { headers })
         ]);
 
         if (!appointmentsRes.ok || !commandsRes.ok) {

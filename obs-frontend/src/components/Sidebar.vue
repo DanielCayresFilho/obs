@@ -1,4 +1,5 @@
-<script setup>
+﻿<script setup>
+import { API_BASE_URL } from '@/config/api';
 import { Icon } from '@iconify/vue';
 import { useRouter } from 'vue-router';
 
@@ -22,7 +23,7 @@ const handleLogout = async () => {
       
       if (token) {
         // Opcional: chamar endpoint de logout no backend
-        await fetch('http://localhost:3000/auth/logout', {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

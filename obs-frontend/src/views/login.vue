@@ -43,6 +43,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { API_BASE_URL } from '@/config/api';
 
 const router = useRouter();
 
@@ -61,7 +62,7 @@ const handleLogin = async () => {
   message.value = { text: '', type: '' };
 
   try {
-    const response = await axios.post('http://localhost:3000/auth/login', {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
       username: username.value,
       password: password.value,
     });

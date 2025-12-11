@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
@@ -371,6 +371,7 @@
 </style>
 
 <script>
+import { API_BASE_URL } from '@/config/api';
 export default {
   props: {
     isOpen: {
@@ -464,7 +465,7 @@ export default {
           throw new Error('Token de autenticação não encontrado');
         }
 
-        const response = await fetch('http://localhost:3000/stock', {
+        const response = await fetch(`${API_BASE_URL}/stock`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -544,7 +545,7 @@ export default {
           payload.clientName = this.formData.clientName;
         }
 
-        const response = await fetch('http://localhost:3000/sales', {
+        const response = await fetch(`${API_BASE_URL}/sales`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

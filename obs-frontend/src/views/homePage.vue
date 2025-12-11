@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="parent">
     <div class="div1">
       <Sidebar />
@@ -514,6 +514,7 @@ div {
 </style>
 
 <script setup>
+import { API_BASE_URL } from '@/config/api';
 import Sidebar from '@/components/Sidebar.vue';
 
 import NewClientModal from '@/components/NewClientModal.vue';
@@ -581,7 +582,7 @@ export default {
         }
 
         // Buscar sessões concluídas
-        const donesRes = await fetch('http://localhost:3000/commands/done', {
+        const donesRes = await fetch(`${API_BASE_URL}/commands/done`, {
           headers
         }) 
         if (!donesRes.ok) throw new Error('Erro ao buscar sessões concluídas')
@@ -597,14 +598,14 @@ export default {
         this.valorReceber = parseFloat(valorReceberData.total || 0)
 
         // Buscar appointments
-        const appointmentsRes = await fetch('http://localhost:3000/appointments', {
+        const appointmentsRes = await fetch(`${API_BASE_URL}/appointments`, {
           headers
         })
         if (!appointmentsRes.ok) throw new Error('Erro ao buscar agendamentos')
         const appointmentsData = await appointmentsRes.json()
 
         // Buscar commands
-        const commandsRes = await fetch('http://localhost:3000/commands/waiting', {
+        const commandsRes = await fetch(`${API_BASE_URL}/commands/waiting`, {
           headers
         })
         if (!commandsRes.ok) throw new Error('Erro ao buscar comandas')

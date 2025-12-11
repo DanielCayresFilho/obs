@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
@@ -278,6 +278,7 @@
 </style>
 
 <script>
+import { API_BASE_URL } from '@/config/api';
 export default {
   props: {
     isOpen: {
@@ -356,7 +357,7 @@ export default {
           paymentStatus: this.formData.paymentStatus
         };
 
-        const response = await fetch('http://localhost:3000/financials', {
+        const response = await fetch(`${API_BASE_URL}/financials`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

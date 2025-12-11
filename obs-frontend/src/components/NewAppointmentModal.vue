@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
@@ -532,6 +532,7 @@
 </style>
 
 <script>
+import { API_BASE_URL } from '@/config/api';
 export default {
   props: {
     isOpen: {
@@ -619,13 +620,13 @@ export default {
           'Content-Type': 'application/json'
         };
 
-        const clientsRes = await fetch('http://localhost:3000/clients', { headers });
+        const clientsRes = await fetch(`${API_BASE_URL}/clients`, { headers });
         if (clientsRes.ok) this.clients = await clientsRes.json();
 
-        const proceduresRes = await fetch('http://localhost:3000/procedures', { headers });
+        const proceduresRes = await fetch(`${API_BASE_URL}/procedures`, { headers });
         if (proceduresRes.ok) this.procedures = await proceduresRes.json();
 
-        const stockRes = await fetch('http://localhost:3000/stock', { headers });
+        const stockRes = await fetch(`${API_BASE_URL}/stock`, { headers });
         if (stockRes.ok) {
           this.stockItems = await stockRes.json();
           
@@ -784,7 +785,7 @@ export default {
           paymentType: this.formData.paymentType
         };
 
-        const commandRes = await fetch('http://localhost:3000/commands', {
+        const commandRes = await fetch(`${API_BASE_URL}/commands`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -845,7 +846,7 @@ export default {
               commandId: commandId
             };
 
-            await fetch('http://localhost:3000/stock-movement', {
+            await fetch(`${API_BASE_URL}/stock-movement`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,

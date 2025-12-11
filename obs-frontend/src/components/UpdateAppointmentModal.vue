@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container">
       <div class="modal-header">
@@ -525,6 +525,7 @@
 </style>
 
 <script>
+import { API_BASE_URL } from '@/config/api';
 export default {
   props: {
     isOpen: {
@@ -657,7 +658,7 @@ export default {
         const token = localStorage.getItem('jwt_token');
         if (!token) throw new Error('Token não encontrado');
 
-        const stockRes = await fetch('http://localhost:3000/stock', {
+        const stockRes = await fetch(`${API_BASE_URL}/stock`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -858,7 +859,7 @@ export default {
               commandId: this.formData.commandId
             };
 
-            await fetch('http://localhost:3000/stock-movement', {
+            await fetch(`${API_BASE_URL}/stock-movement`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
