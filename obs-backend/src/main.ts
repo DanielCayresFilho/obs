@@ -17,9 +17,34 @@ async function bootstrap() {
         'https://obscura.covenos.com.br', // Produção frontend (fallback)
       ];
 
-  // Configuração CORS para permitir requests do frontend
+  // Log para debug (remover em produção se necessário)
+  console.log('CORS Allowed Origins:', allowedOrigins);
+
+  // Configuração CORS com callback para permitir mais controle
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Permite requisições sem origin (mobile apps, Postman, etc)
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      // Verifica se o origin está na lista permitida
+      if (allowedOrigins.includes(origin)) {
+        console.log('CORS allowed origin:', origin);
+        return callback(null, true);
+      }
+      
+      // Log para debug
+      console.log('CORS blocked origin:', origin, 'Allowed:', allowedOrigins);
+      // Em desenvolvimento, podemos ser mais permissivos
+      // Em produção, deve bloquear
+      const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
+      if (isDevelopment) {
+        console.warn('CORS: Allowing origin in development mode:', origin);
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
