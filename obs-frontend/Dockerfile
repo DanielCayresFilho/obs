@@ -1,15 +1,25 @@
+# ============================================
+# Dockerfile para Frontend - Produção (Coolify)
+# ============================================
+
 # Stage 1: Build
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Argumento de build para API URL (configurar no Coolify)
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Copiar package.json e instalar dependências
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copiar código e fazer build
+# Copiar código fonte
 COPY . .
-RUN npm run build
+
+# Fazer build (VITE_API_URL será injetado aqui)
+RUN echo "Building with VITE_API_URL=${VITE_API_URL}" && npm run build
 
 # Stage 2: Servir com nginx
 FROM nginx:alpine
