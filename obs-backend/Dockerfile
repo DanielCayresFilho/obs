@@ -29,7 +29,7 @@ RUN npm run build
 # Stage 2: Production
 FROM node:20-alpine AS production
 
-# Instalar dependências necessárias para o bcrypt
+# Instalar dependências necessárias para o bcrypt em runtime
 RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
@@ -43,12 +43,12 @@ RUN npm install --omit=dev --legacy-peer-deps
 # Copiar o build do stage anterior
 COPY --from=builder /app/dist ./dist
 
-# Copiar prisma schema e gerar cliente
+# Copiar prisma schema (necessário para migrations em runtime)
 COPY --from=builder /app/prisma ./prisma
-RUN npx prisma generate
 
-# Copiar node_modules do prisma client se necessário
+# Copiar o Prisma Client gerado do builder
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Expor porta
 EXPOSE 3000
