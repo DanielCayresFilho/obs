@@ -45,7 +45,7 @@
         </div>
 
         <div class="form-row">
-          <div class="form-group">
+          <div class="form-group" v-if="formData.type === 'intern'">
             <label for="price">Preço (R$) *</label>
             <input
               type="text"
@@ -53,6 +53,30 @@
               v-model="formData.price"
               placeholder="0,00"
               @input="formatPrice"
+              required
+            />
+          </div>
+
+          <div class="form-group" v-if="formData.type === 'sale'">
+            <label for="costPrice">Valor de Compra (R$) *</label>
+            <input
+              type="text"
+              id="costPrice"
+              v-model="formData.costPrice"
+              placeholder="0,00"
+              @input="formatCostPrice"
+              required
+            />
+          </div>
+
+          <div class="form-group" v-if="formData.type === 'sale'">
+            <label for="salePrice">Valor de Venda (R$) *</label>
+            <input
+              type="text"
+              id="salePrice"
+              v-model="formData.salePrice"
+              placeholder="0,00"
+              @input="formatSalePrice"
               required
             />
           </div>
@@ -340,6 +364,8 @@ export default {
         name: '',
         type: 'intern',
         price: '',
+        costPrice: '',
+        salePrice: '',
         quantity: 0,
         length: '0',
         usable: '0',
@@ -362,6 +388,30 @@ export default {
 
       const numValue = parseInt(value) / 100;
       this.formData.price = numValue.toFixed(2).replace('.', ',');
+    },
+
+    formatCostPrice(event) {
+      let value = event.target.value.replace(/\D/g, '');
+      
+      if (value.length === 0) {
+        this.formData.costPrice = '';
+        return;
+      }
+
+      const numValue = parseInt(value) / 100;
+      this.formData.costPrice = numValue.toFixed(2).replace('.', ',');
+    },
+
+    formatSalePrice(event) {
+      let value = event.target.value.replace(/\D/g, '');
+      
+      if (value.length === 0) {
+        this.formData.salePrice = '';
+        return;
+      }
+
+      const numValue = parseInt(value) / 100;
+      this.formData.salePrice = numValue.toFixed(2).replace('.', ',');
     },
 
     formatLength(event) {
@@ -400,6 +450,8 @@ export default {
         name: '',
         type: 'intern',
         price: '',
+        costPrice: '',
+        salePrice: '',
         quantity: 0,
         length: '0',
         usable: '0',
@@ -421,18 +473,26 @@ export default {
           throw new Error('Token de autenticação não encontrado');
         }
 
-        const priceValue = parseFloat(this.formData.price.replace(',', '.'));
+        const priceValue = this.formData.price ? parseFloat(this.formData.price.replace(',', '.')) : 0;
+        const costPriceValue = this.formData.costPrice ? parseFloat(this.formData.costPrice.replace(',', '.')) : null;
+        const salePriceValue = this.formData.salePrice ? parseFloat(this.formData.salePrice.replace(',', '.')) : null;
         const lengthValue = parseFloat(this.formData.length.replace(',', '.'));
         const usableValue = parseFloat(this.formData.usable.replace(',', '.'));
 
-        if (isNaN(priceValue) || priceValue < 0) {
+        if (this.formData.type === 'intern' && (isNaN(priceValue) || priceValue < 0)) {
           throw new Error('Preço inválido');
+        }
+
+        if (this.formData.type === 'sale' && (!costPriceValue || !salePriceValue)) {
+          throw new Error('Valores de compra e venda são obrigatórios para itens de venda');
         }
 
         const payload = {
           name: this.formData.name,
           type: this.formData.type,
-          price: priceValue,
+          price: this.formData.type === 'intern' ? priceValue : salePriceValue,
+          costPrice: costPriceValue,
+          salePrice: salePriceValue,
           quantity: this.formData.quantity,
           length: lengthValue,
           usable: usableValue,

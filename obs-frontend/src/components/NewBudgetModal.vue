@@ -7,108 +7,53 @@
       </div>
 
       <form @submit.prevent="handleSubmit" class="modal-form">
-        <!-- Nome do Orçamento -->
+        <!-- Nome do Cliente -->
         <div class="form-group">
-          <label for="budgetName">Nome do Orçamento *</label>
+          <label for="clientName">Nome do Cliente *</label>
           <input
             type="text"
-            id="budgetName"
-            v-model="formData.budgetName"
-            placeholder="Ex: Tatuagem Braço - João Silva"
+            id="clientName"
+            v-model="formData.clientName"
+            placeholder="Digite o nome do cliente"
             required
           />
         </div>
 
-        <!-- Cliente -->
+        <!-- Telefone -->
         <div class="form-group">
-          <label for="client">Cliente *</label>
-          <select
-            id="client"
-            v-model="selectedClientId"
-            @change="onClientChange"
+          <label for="phone">Telefone *</label>
+          <input
+            type="tel"
+            id="phone"
+            v-model="formData.phone"
+            placeholder="14996699666"
+            @input="formatPhone"
+            maxlength="15"
             required
-          >
-            <option value="">Selecione um cliente</option>
-            <option v-for="client in clients" :key="client.id" :value="client.id">
-              {{ client.name }}
-            </option>
-          </select>
+          />
         </div>
 
-        <!-- Procedimentos -->
+        <!-- Valor -->
         <div class="form-group">
-          <label>Procedimentos *</label>
-          <div class="materials-container">
-            <div v-for="(proc, index) in selectedProcedures" :key="index" class="material-item">
-              <select 
-                v-model="proc.id" 
-                @change="onProcedureChange(index)" 
-                class="material-select" 
-                required
-              >
-                <option value="">Selecione um procedimento</option>
-                <option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">
-                  {{ procedure.procedureName }} - {{ procedure.procedureType }} (R$ {{ procedure.procedurePrice }})
-                </option>
-              </select>
-              
-              <button 
-                type="button" 
-                @click="removeProcedure(index)" 
-                class="btn-remove" 
-                v-if="selectedProcedures.length > 1"
-              >
-                &times;
-              </button>
-            </div>
-            
-            <button type="button" @click="addProcedure" class="btn-add-material">
-              + Adicionar Procedimento
-            </button>
-          </div>
-        </div>
-
-        <!-- Descrição -->
-        <div class="form-group">
-          <label for="description">Descrição/Observações</label>
-          <textarea
-            id="description"
-            v-model="formData.description"
-            placeholder="Detalhes sobre cores, tamanho, local do corpo, etc..."
-            rows="4"
-          ></textarea>
-        </div>
-
-        <!-- Desconto -->
-        <div class="form-group">
-          <label for="discount">Desconto (R$)</label>
+          <label for="price">Valor do Orçamento (R$) *</label>
           <input
             type="number"
-            id="discount"
-            v-model.number="formData.discount"
+            id="price"
+            v-model.number="formData.price"
             placeholder="0.00"
             step="0.01"
             min="0"
-            @input="calculateFinalPrice"
+            required
           />
         </div>
 
-        <!-- Valor Total -->
-        <div class="form-group">
-          <label>Valor Total</label>
-          <div class="total-price">
-            {{ formatCurrency(formData.finalPrice) }}
-          </div>
-        </div>
-
-        <!-- Data de Validade -->
+        <!-- Validade -->
         <div class="form-group">
           <label for="validityDate">Validade do Orçamento *</label>
           <input
             type="date"
             id="validityDate"
             v-model="formData.validityDate"
-            :min="minValidityDate"
             required
           />
         </div>
@@ -125,11 +70,7 @@
           <button type="button" class="btn-cancel" @click="closeModal" :disabled="loading">
             Cancelar
           </button>
-          <button 
-            type="submit" 
-            class="btn-submit" 
-            :disabled="loading || !selectedProcedures.some(p => p.id !== '')"
-          >
+          <button type="submit" class="btn-submit" :disabled="loading">
             {{ loading ? 'Criando...' : 'Criar Orçamento' }}
           </button>
         </div>
@@ -156,7 +97,7 @@
   background-color: #f0f0f0;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
+  max-width: 450px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -213,8 +154,7 @@
   font-size: 14px;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   width: 100%;
   padding: 12px;
   background-color: transparent;
@@ -226,113 +166,13 @@
   transition: border-color 0.3s;
 }
 
-.form-group textarea {
-  width: 100%;
-  padding: 12px;
-  background-color: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  color: black;
-  font-size: 16px;
-  box-sizing: border-box;
-  transition: border-color 0.3s;
-  font-family: inherit;
-  resize: vertical;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group input:focus {
   outline: none;
   border-bottom-color: #d7385a;
 }
 
-.form-group textarea:focus {
-  border-color: #d7385a;
-}
-
-.form-group select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d2335' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.form-group input::placeholder {
   color: #999;
-}
-
-.total-price {
-  padding: 16px;
-  background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
-  border: 2px solid #d7385a;
-  border-radius: 8px;
-  color: #5a1e2b;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Materiais/Procedimentos */
-.materials-container {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  background-color: #fafafa;
-}
-
-.material-item {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.material-select {
-  flex: 2;
-  padding: 10px;
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  color: black;
-  font-size: 14px;
-}
-
-.btn-remove {
-  background-color: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.btn-remove:hover {
-  background-color: #ff5252;
-}
-
-.btn-add-material {
-  width: 100%;
-  padding: 10px;
-  background-color: white;
-  color: #6d2335;
-  border: 2px dashed #d7385a;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s;
-}
-
-.btn-add-material:hover {
-  background-color: #fef5f7;
-  border-color: #5a1e2b;
 }
 
 .error-message {
@@ -418,6 +258,7 @@
 
 <script>
 import { API_BASE_URL } from '@/config/api';
+
 export default {
   props: {
     isOpen: {
@@ -427,151 +268,63 @@ export default {
   },
 
   data() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     return {
       formData: {
-        budgetName: '',
-        idClient: null,
         clientName: '',
-        idUser: null,
-        userResponsibility: '',
-        description: '',
-        procedures: '',
-        estimatedPrice: 0,
-        discount: 0,
-        finalPrice: 0,
+        phone: '',
+        price: 0,
         validityDate: ''
       },
-      clients: [],
-      procedures: [],
-      selectedClientId: '',
-      selectedProcedures: [{ id: '', name: '', price: 0 }],
       loading: false,
       error: null,
-      success: false,
-      minValidityDate: tomorrow.toISOString().split('T')[0]
-    }
-  },
-
-  watch: {
-    isOpen(newValue) {
-      if (newValue) {
-        this.resetForm();
-        this.fetchClients();
-        this.fetchProcedures();
-        this.loadUserData();
-      }
+      success: false
     }
   },
 
   methods: {
-    async fetchClients() {
-      try {
-        const token = localStorage.getItem('jwt_token');
-        const response = await fetch(`${API_BASE_URL}/clients`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+    formatPhone(event) {
+      let value = event.target.value.replace(/\D/g, '');
+      
+      if (value.length > 11) {
+        value = value.slice(0, 11);
+      }
+      
+      this.formData.phone = value;
+    },
 
-        if (!response.ok) throw new Error('Erro ao buscar clientes');
-
-        this.clients = await response.json();
-      } catch (err) {
-        console.error('Erro ao buscar clientes:', err);
+    closeModal() {
+      if (!this.loading) {
+        this.resetForm();
+        this.$emit('close');
       }
     },
 
-    async fetchProcedures() {
-      try {
-        const token = localStorage.getItem('jwt_token');
-        const response = await fetch(`${API_BASE_URL}/procedures`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) throw new Error('Erro ao buscar procedimentos');
-
-        this.procedures = await response.json();
-      } catch (err) {
-        console.error('Erro ao buscar procedimentos:', err);
-      }
-    },
-
-    loadUserData() {
-      const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-      this.formData.idUser = userData.id;
-      this.formData.userResponsibility = userData.name;
-    },
-
-    onClientChange() {
-      const client = this.clients.find(c => c.id === parseInt(this.selectedClientId));
-      if (client) {
-        this.formData.idClient = client.id;
-        this.formData.clientName = client.name;
-      }
-    },
-
-    addProcedure() {
-      this.selectedProcedures.push({ id: '', name: '', price: 0 });
-    },
-
-    removeProcedure(index) {
-      if (this.selectedProcedures.length > 1) {
-        this.selectedProcedures.splice(index, 1);
-        this.calculatePrices();
-      }
-    },
-
-    onProcedureChange(index) {
-      const selectedId = this.selectedProcedures[index].id;
-      const procedure = this.procedures.find(p => p.id === selectedId);
-
-      if (procedure) {
-        this.selectedProcedures[index].name = procedure.procedureName;
-        this.selectedProcedures[index].price = parseFloat(procedure.procedurePrice);
-        this.calculatePrices();
-      }
-    },
-
-    calculatePrices() {
-      this.formData.estimatedPrice = this.selectedProcedures.reduce(
-        (sum, proc) => sum + (parseFloat(proc.price) || 0),
-        0
-      );
-      this.calculateFinalPrice();
-    },
-
-    calculateFinalPrice() {
-      const discount = parseFloat(this.formData.discount) || 0;
-      this.formData.finalPrice = Math.max(0, this.formData.estimatedPrice - discount);
+    resetForm() {
+      this.formData = {
+        clientName: '',
+        phone: '',
+        price: 0,
+        validityDate: ''
+      };
+      this.error = null;
+      this.success = false;
     },
 
     async handleSubmit() {
-      const hasValidProcedure = this.selectedProcedures.some(p => p.id !== '');
-
-      if (!hasValidProcedure) {
-        this.error = 'Selecione pelo menos um procedimento';
-        return;
-      }
-
       try {
         this.loading = true;
         this.error = null;
         this.success = false;
 
         const token = localStorage.getItem('jwt_token');
+        if (!token) throw new Error('Token não encontrado');
 
-        const selectedProceduresNames = this.selectedProcedures
-          .filter(p => p.id !== '')
-          .map(p => p.name);
-        this.formData.procedures = JSON.stringify(selectedProceduresNames);
+        const payload = {
+          clientName: this.formData.clientName,
+          phone: this.formData.phone,
+          price: this.formData.price,
+          validityDate: this.formData.validityDate
+        };
 
         const response = await fetch(`${API_BASE_URL}/budgets`, {
           method: 'POST',
@@ -579,16 +332,16 @@ export default {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(this.formData)
+          body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Erro ao criar orçamento');
+          const errData = await response.json();
+          throw new Error(errData.message || 'Erro ao criar orçamento');
         }
 
         const budget = await response.json();
-
+        
         this.success = true;
         this.$emit('budget-created', budget);
 
@@ -598,44 +351,10 @@ export default {
 
       } catch (err) {
         this.error = err.message;
-        console.error('Erro:', err);
+        console.error('Erro ao criar orçamento:', err);
       } finally {
         this.loading = false;
       }
-    },
-
-    closeModal() {
-      if (!this.loading) {
-        this.$emit('close');
-      }
-    },
-
-    resetForm() {
-      this.formData = {
-        budgetName: '',
-        idClient: null,
-        clientName: '',
-        idUser: null,
-        userResponsibility: '',
-        description: '',
-        procedures: '',
-        estimatedPrice: 0,
-        discount: 0,
-        finalPrice: 0,
-        validityDate: ''
-      };
-      this.selectedClientId = '';
-      this.selectedProcedures = [{ id: '', name: '', price: 0 }];
-      this.error = null;
-      this.success = false;
-      this.loadUserData();
-    },
-
-    formatCurrency(value) {
-      return parseFloat(value || 0).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      });
     }
   }
 }

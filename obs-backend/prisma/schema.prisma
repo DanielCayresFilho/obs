@@ -73,6 +73,7 @@ model Clients {
   birthday DateTime @db.Date
   instagram String
   clientPicture String?
+  observations String?
   createdAt DateTime @default(now())
   
   @@index([name, phone, createdAt])
@@ -101,7 +102,9 @@ model Stock {
   id Int @id @default(autoincrement())
   name String
   type StockType @default(intern)
-  price Decimal 
+  price Decimal
+  costPrice Decimal?
+  salePrice Decimal?
   quantity Int
   length Decimal 
   usable Decimal
@@ -123,7 +126,7 @@ model StockMovement {
   length Decimal?
   stockType StockType
   operational Boolean @default(false) 
-  movementType MovementType @default(output) // alterado default
+  movementType MovementType @default(output)
   createdAt DateTime @default(now())
   commandId Int?
   command commands? @relation(fields: [commandId], references: [id])
@@ -134,29 +137,20 @@ model StockMovement {
   @@index([nameStock, operational, createdAt])
 }
 
-model procedures {
-  id Int @id @default(autoincrement())
-  procedureName String
-  procedureType String
-  duration Int
-  procedurePrice Decimal 
-  createdAt DateTime @default(now())
-
-  @@index([procedureType, createdAt])
-}
-
 model appointments {
   id Int @id @default(autoincrement())
-  procedure String
+  tattooStyle String
+  estimatedTime Int?
+  bodyLocation String?
+  totalPrice Decimal @default(0)
   appointmentDate DateTime
   createdAt DateTime @default(now())
   appointment AppointmentStatus @default(waiting)
   appointmentPicture String?
 
-
   commandId Int
   command commands @relation(fields: [commandId], references: [id])
-  @@index([procedure, appointmentDate])
+  @@index([tattooStyle, appointmentDate])
 } 
 
 model commands {
@@ -189,26 +183,18 @@ model financials {
   price Decimal
   vencimentDay DateTime @db.Date
   paymentStatus PaymentStatus
+  isRecurrent Boolean @default(false)
+  recurrenceDay Int?
 }
 
 model budgets {
   id Int @id @default(autoincrement())
-  budgetName String
-  idClient Int
   clientName String
-  idUser Int
-  userResponsibility String
-  description String?
-  procedures String
-  estimatedPrice Decimal @default(0)
-  discount Decimal @default(0)
-  finalPrice Decimal @default(0)
+  phone String
+  price Decimal @default(0)
   status BudgetStatus @default(pending)
   validityDate DateTime @db.Date
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  linkedCommandId Int?
 
   @@index([clientName, status, createdAt])
 }

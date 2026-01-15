@@ -52,6 +52,16 @@
         </div>
 
         <div class="form-group">
+          <label for="observations">Observações</label>
+          <textarea
+            id="observations"
+            v-model="formData.observations"
+            placeholder="Ex: Indicação da Maria, alergia a látex..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
           <label for="photo">Foto do Cliente</label>
           <div class="photo-upload-area">
             <input
@@ -370,7 +380,8 @@ export default {
         name: '',
         phone: '',
         birthday: '',
-        instagram: ''
+        instagram: '',
+        observations: ''
       },
       photoFile: null,
       photoPreview: null,
@@ -440,7 +451,8 @@ export default {
         name: '',
         phone: '',
         birthday: '',
-        instagram: ''
+        instagram: '',
+        observations: ''
       };
       this.photoFile = null;
       this.photoPreview = null;
@@ -471,6 +483,10 @@ export default {
         
         if (this.formData.instagram) {
           formData.append('instagram', this.formData.instagram);
+        }
+        
+        if (this.formData.observations) {
+          formData.append('observations', this.formData.observations);
         }
         
         // Adicionar foto se existir

@@ -11,7 +11,6 @@ const menuItems = [
   { label: 'ORÇAMENTOS', icon: 'ph:calculator-thin', path: '/budgets' },
   { label: 'AGENDA', icon: 'ph:book-thin', path: '/appointments' },
   { label: 'GALERIA', icon: 'arcticons:lineage-gallery', path: '/gallery' },
-  { label: 'PROCEDIMENTOS', icon: 'ph:gear-six-thin', path: '/procedures' },
   { label: 'ESTOQUE', icon: 'ph:bag-thin', path: '/stock' },
   { label: 'FINANCEIRO', icon: 'arcticons:moneywallet', path: '/financials' },
 ];

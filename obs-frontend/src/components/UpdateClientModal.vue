@@ -52,6 +52,16 @@
         </div>
 
         <div class="form-group">
+          <label for="observations">Observações</label>
+          <textarea
+            id="observations"
+            v-model="formData.observations"
+            placeholder="Ex: Indicação da Maria, alergia a látex..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
           <label for="photo">Foto do Cliente</label>
           <div class="photo-upload-area">
             <input
@@ -101,6 +111,9 @@
         </div>
 
         <div class="modal-actions">
+          <button type="button" class="btn-delete" @click="handleDelete" :disabled="loading">
+            Excluir
+          </button>
           <button type="button" class="btn-cancel" @click="closeModal" :disabled="loading">
             Cancelar
           </button>
@@ -267,9 +280,47 @@
 }
 
 .btn-cancel:disabled,
-.btn-submit:disabled {
+.btn-submit:disabled,
+.btn-delete:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-delete {
+  flex: 0.5;
+  padding: 12px 16px;
+  border: 2px solid #ff4444;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: transparent;
+  color: #ff4444;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background-color: #ff4444;
+  color: white;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  background-color: transparent;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  color: black;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #d7385a;
 }
 
 /* Scrollbar customizada */
@@ -392,7 +443,8 @@ export default {
         name: '',
         phone: '',
         birthday: '',
-        instagram: ''
+        instagram: '',
+        observations: ''
       },
       currentPhoto: null,
       photoFile: null,
@@ -420,7 +472,8 @@ export default {
         name: client.name || '',
         phone: client.phone || '',
         birthday: this.formatDateForInput(client.birthday) || '',
-        instagram: client.instagram || ''
+        instagram: client.instagram || '',
+        observations: client.observations || ''
       };
       this.currentPhoto = client.clientPicture || null;
       this.photoFile = null;
@@ -496,7 +549,8 @@ export default {
         name: '',
         phone: '',
         birthday: '',
-        instagram: ''
+        instagram: '',
+        observations: ''
       };
       this.currentPhoto = null;
       this.photoFile = null;
@@ -529,7 +583,8 @@ export default {
           name: this.formData.name,
           phone: this.formData.phone,
           birthday: this.formData.birthday,
-          instagram: this.formData.instagram || null
+          instagram: this.formData.instagram || null,
+          observations: this.formData.observations || null
         };
 
         const updateResponse = await fetch(`http://localhost:3000/clients/${this.client.id}`, {
@@ -582,6 +637,48 @@ export default {
       } catch (err) {
         this.error = err.message;
         console.error('Erro ao atualizar cliente:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleDelete() {
+      if (!confirm('Tem certeza que deseja EXCLUIR este cliente? Esta ação não pode ser desfeita.')) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        this.error = null;
+
+        const token = localStorage.getItem('jwt_token');
+        
+        if (!token) {
+          throw new Error('Token de autenticação não encontrado');
+        }
+
+        if (!this.client || !this.client.id) {
+          throw new Error('Cliente não encontrado');
+        }
+
+        const response = await fetch(`http://localhost:3000/clients/${this.client.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Erro ao excluir cliente');
+        }
+
+        this.$emit('client-deleted', this.client.id);
+        this.closeModal();
+
+      } catch (err) {
+        this.error = err.message;
+        console.error('Erro ao excluir cliente:', err);
       } finally {
         this.loading = false;
       }

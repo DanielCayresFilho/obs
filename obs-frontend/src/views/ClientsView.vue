@@ -90,6 +90,7 @@
       :client="selectedClient"
       @close="showUpdateModal = false"
       @client-updated="handleClientUpdated"
+      @client-deleted="handleClientDeleted"
     />
 </div>
 </template>
@@ -502,6 +503,11 @@ export default {
 
     handleClientUpdated(client) {
       console.log('Cliente atualizado:', client);
+      this.fetchClients();
+    },
+
+    handleClientDeleted(clientId) {
+      console.log('Cliente excluído:', clientId);
       this.fetchClients();
     },
 

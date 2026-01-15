@@ -34,30 +34,45 @@
           />
         </div>
 
-        <!-- Procedimentos -->
+        <!-- Estilo de Tattoo -->
         <div class="form-group">
-          <label>Procedimentos *</label>
-          <div class="materials-container">
-            <div v-for="(proc, index) in formData.procedures" :key="index" class="material-item">
-              <select v-model="proc.id" @change="onProcedureChange(index)" class="material-select" required>
-                <option value="">Selecione um procedimento</option>
-                <option v-for="procedure in procedures" :key="procedure.id" :value="procedure.id">
-                  {{ procedure.procedureName }} - {{ procedure.procedureType }} (R$ {{ procedure.procedurePrice }})
-                </option>
-              </select>
-              
-              <button type="button" @click="removeProcedure(index)" class="btn-remove" v-if="formData.procedures.length > 1">
-                &times;
-              </button>
-            </div>
-            
-            <button type="button" @click="addProcedure" class="btn-add-material">
-              + Adicionar Procedimento
-            </button>
-          </div>
+          <label for="tattooStyle">Estilo de Tattoo *</label>
+          <select
+            id="tattooStyle"
+            v-model="formData.tattooStyle"
+            required
+          >
+            <option value="">Selecione um estilo</option>
+            <option v-for="style in tattooStyles" :key="style" :value="style">
+              {{ style }}
+            </option>
+          </select>
         </div>
 
-        <!-- Upload de Foto -->
+        <!-- Tempo Estimado -->
+        <div class="form-group">
+          <label for="estimatedTime">Tempo Estimado (minutos)</label>
+          <input
+            type="number"
+            id="estimatedTime"
+            v-model.number="formData.estimatedTime"
+            placeholder="Ex: 120"
+            min="0"
+          />
+        </div>
+
+        <!-- Local da Tatuagem -->
+        <div class="form-group">
+          <label for="bodyLocation">Local da Tatuagem</label>
+          <input
+            type="text"
+            id="bodyLocation"
+            v-model="formData.bodyLocation"
+            placeholder="Ex: Braço esquerdo, costas..."
+          />
+        </div>
+
+        <!-- Upload de Foto (Decalque) -->
         <div class="form-group">
           <label for="photo">Decalque</label>
           <div class="photo-upload-area">
@@ -76,7 +91,7 @@
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                 <polyline points="21 15 16 10 5 21"></polyline>
               </svg>
-              <p>Clique para adicionar foto do procedimento</p>
+              <p>Clique para adicionar foto do decalque</p>
             </div>
 
             <div v-else class="photo-preview">
@@ -91,6 +106,7 @@
           </div>
         </div>
 
+        <!-- Materiais Utilizados -->
         <div class="form-group">
           <label>Materiais Utilizados</label>
           <div class="materials-container">
@@ -124,6 +140,20 @@
           </div>
         </div>
 
+        <!-- Valor Total (editável) -->
+        <div class="form-group">
+          <label for="totalPrice">Valor Total (R$) *</label>
+          <input
+            type="number"
+            id="totalPrice"
+            v-model.number="formData.totalPrice"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            required
+          />
+        </div>
+
         <!-- Desconto -->
         <div class="form-group">
           <label for="discount">Desconto (R$)</label>
@@ -137,11 +167,11 @@
           />
         </div>
 
-        <!-- Valor Total (calculado) -->
+        <!-- Valor Final (calculado) -->
         <div class="form-group">
-          <label>Valor Total</label>
+          <label>Valor Final</label>
           <div class="total-price">
-            R$ {{ calculateTotal() }}
+            R$ {{ calculateFinal() }}
           </div>
         </div>
 
@@ -392,7 +422,6 @@
 
 .upload-placeholder:hover {
   background-color: rgba(215, 56, 90, 0.1);
-  border-color: #5a1e2b;
 }
 
 .upload-placeholder svg {
@@ -533,6 +562,25 @@
 
 <script>
 import { API_BASE_URL } from '@/config/api';
+
+// Lista de estilos de tattoo
+const TATTOO_STYLES = [
+  'Fineline',
+  'Minimalista',
+  'Frase',
+  'Lettering',
+  'Dark',
+  'Geek',
+  'Blackwork',
+  'Bold Hatch',
+  'Flash Autoral',
+  'Flash',
+  'Oldschool',
+  'Neotrad',
+  'Ornamental',
+  'Geométrica'
+];
+
 export default {
   props: {
     isOpen: {
@@ -544,16 +592,19 @@ export default {
   data() {
     return {
       clients: [],
-      procedures: [],
       stockItems: [],
       stockUsableMap: {},
+      tattooStyles: TATTOO_STYLES,
       photoFile: null,
       photoPreview: null,
       formData: {
         idClient: '',
         clienteName: '',
         appointmentDate: '',
-        procedures: [{ id: '', name: '', type: '', price: 0 }],
+        tattooStyle: '',
+        estimatedTime: null,
+        bodyLocation: '',
+        totalPrice: 0,
         discount: 0,
         paymentType: 'money',
         materials: []
@@ -577,13 +628,11 @@ export default {
       const file = event.target.files[0];
       
       if (file) {
-        // Validar tipo de arquivo
         if (!file.type.startsWith('image/')) {
           this.error = 'Por favor, selecione apenas arquivos de imagem';
           return;
         }
 
-        // Validar tamanho (máximo 5MB)
         if (file.size > 5 * 1024 * 1024) {
           this.error = 'A imagem deve ter no máximo 5MB';
           return;
@@ -591,7 +640,6 @@ export default {
 
         this.photoFile = file;
         
-        // Criar preview
         const reader = new FileReader();
         reader.onload = (e) => {
           this.photoPreview = e.target.result;
@@ -623,9 +671,6 @@ export default {
         const clientsRes = await fetch(`${API_BASE_URL}/clients`, { headers });
         if (clientsRes.ok) this.clients = await clientsRes.json();
 
-        const proceduresRes = await fetch(`${API_BASE_URL}/procedures`, { headers });
-        if (proceduresRes.ok) this.procedures = await proceduresRes.json();
-
         const stockRes = await fetch(`${API_BASE_URL}/stock`, { headers });
         if (stockRes.ok) {
           this.stockItems = await stockRes.json();
@@ -647,29 +692,6 @@ export default {
       if (client) {
         this.formData.clienteName = client.name;
       }
-    },
-
-    onProcedureChange(index) {
-      const proc = this.formData.procedures[index];
-      const procedure = this.procedures.find(p => p.id === proc.id);
-      if (procedure) {
-        proc.name = procedure.procedureName;
-        proc.type = procedure.procedureType;
-        proc.price = parseFloat(procedure.procedurePrice);
-      }
-    },
-
-    addProcedure() {
-      this.formData.procedures.push({
-        id: '',
-        name: '',
-        type: '',
-        price: 0
-      });
-    },
-
-    removeProcedure(index) {
-      this.formData.procedures.splice(index, 1);
     },
 
     onMaterialChange(index) {
@@ -698,13 +720,11 @@ export default {
       this.formData.materials.splice(index, 1);
     },
 
-    calculateTotal() {
-      const proceduresTotal = this.formData.procedures.reduce((sum, proc) => {
-        return sum + (proc.price || 0);
-      }, 0);
+    calculateFinal() {
+      const total = this.formData.totalPrice || 0;
       const discount = this.formData.discount || 0;
-      const total = proceduresTotal - discount;
-      return total.toFixed(2);
+      const final = total - discount;
+      return final.toFixed(2);
     },
 
     getUserId() {
@@ -729,7 +749,10 @@ export default {
         idClient: '',
         clienteName: '',
         appointmentDate: '',
-        procedures: [{ id: '', name: '', type: '', price: 0 }],
+        tattooStyle: '',
+        estimatedTime: null,
+        bodyLocation: '',
+        totalPrice: 0,
         discount: 0,
         paymentType: 'money',
         materials: []
@@ -768,20 +791,17 @@ export default {
 
         const userId = this.getUserId();
         const userName = this.getUserName();
+        const finalPrice = parseFloat(this.calculateFinal());
 
-        const procedureTypes = this.formData.procedures
-          .map(p => p.type)
-          .filter(t => t)
-          .join(', ');
-
+        // 1. Criar comanda
         const commandPayload = {
-          commandName: `${procedureTypes || 'Procedimento'} - ${this.formData.clienteName}`,
+          commandName: `${this.formData.tattooStyle} - ${this.formData.clienteName}`,
           idUser: userId,
           userResponsibility: userName,
           idClient: this.formData.idClient,
           clienteName: this.formData.clienteName,
           discount: this.formData.discount || 0,
-          totalPrice: parseFloat(this.calculateTotal()),
+          totalPrice: finalPrice,
           paymentType: this.formData.paymentType
         };
 
@@ -800,50 +820,58 @@ export default {
         }
 
         const command = await commandRes.json();
-        const commandId = command.id;
 
-        // Criar agendamentos para cada procedimento
-        for (const proc of this.formData.procedures) {
-          if (proc.id) {
-            // Usar FormData para enviar foto junto com dados do appointment
-            const formData = new FormData();
-            formData.append('procedure', proc.name);
-            formData.append('appointmentDate', new Date(this.formData.appointmentDate).toISOString());
-            
-            // Adicionar foto se existir (apenas no primeiro procedimento)
-            if (this.photoFile && this.formData.procedures.indexOf(proc) === 0) {
-              formData.append('file', this.photoFile);
-            }
+        // 2. Criar appointment
+        const appointmentPayload = {
+          tattooStyle: this.formData.tattooStyle,
+          estimatedTime: this.formData.estimatedTime || null,
+          bodyLocation: this.formData.bodyLocation || null,
+          totalPrice: this.formData.totalPrice,
+          appointmentDate: this.formData.appointmentDate,
+          commandId: command.id
+        };
 
-            const appointmentRes = await fetch(`http://localhost:3000/appointments/commands/${commandId}/appointments`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`
-                // Não enviar Content-Type, o browser define automaticamente
-              },
-              body: formData
-            });
+        const appointmentRes = await fetch(`${API_BASE_URL}/appointments`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(appointmentPayload)
+        });
 
-            if (!appointmentRes.ok) {
-              throw new Error('Erro ao criar agendamento');
-            }
-          }
+        if (!appointmentRes.ok) {
+          const errData = await appointmentRes.json();
+          throw new Error(errData.message || 'Erro ao criar agendamento');
         }
 
-        // Criar movimentações de estoque
+        const appointment = await appointmentRes.json();
+
+        // 3. Upload de foto se existir
+        if (this.photoFile) {
+          const photoFormData = new FormData();
+          photoFormData.append('file', this.photoFile);
+
+          await fetch(`${API_BASE_URL}/appointments/${appointment.id}/photo`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: photoFormData
+          });
+        }
+
+        // 4. Registrar movimentos de estoque
         for (const material of this.formData.materials) {
-          if (material.idStock) {
+          if (material.idStock && material.used > 0) {
             const stockMovementPayload = {
               idStock: material.idStock,
               nameStock: material.nameStock,
-              cost: material.cost,
-              used: material.used || 0,
-              quantity: material.quantity || null,
-              length: material.length || null,
+              cost: material.cost * material.used,
+              used: material.used,
               stockType: material.stockType,
-              operational: true,
               movementType: 'output',
-              commandId: commandId
+              commandId: command.id
             };
 
             await fetch(`${API_BASE_URL}/stock-movement`, {

@@ -56,6 +56,30 @@
           </select>
         </div>
 
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              v-model="formData.isRecurrent"
+            />
+            <span class="checkbox-text">Conta Recorrente</span>
+          </label>
+        </div>
+
+        <div class="form-group" v-if="formData.isRecurrent">
+          <label for="recurrenceDay">Dia de Recorrência (1-31) *</label>
+          <input
+            type="number"
+            id="recurrenceDay"
+            v-model.number="formData.recurrenceDay"
+            min="1"
+            max="31"
+            placeholder="Ex: 10"
+            required
+          />
+          <small class="helper-text">A conta será gerada automaticamente todo mês neste dia</small>
+        </div>
+
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
@@ -190,6 +214,38 @@
   color: #999;
 }
 
+.checkbox-group {
+  margin: 20px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  accent-color: #d7385a;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  color: #6d2335;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.helper-text {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+  font-size: 12px;
+}
+
 .error-message {
   background-color: rgba(255, 107, 107, 0.1);
   border: 1px solid #ff6b6b;
@@ -293,7 +349,9 @@ export default {
         accountName: '',
         price: '',
         vencimentDay: '',
-        paymentStatus: 'unpaid'
+        paymentStatus: 'unpaid',
+        isRecurrent: false,
+        recurrenceDay: null
       },
       loading: false,
       error: null,
@@ -326,7 +384,9 @@ export default {
         accountName: '',
         price: '',
         vencimentDay: '',
-        paymentStatus: 'unpaid'
+        paymentStatus: 'unpaid',
+        isRecurrent: false,
+        recurrenceDay: null
       };
       this.error = null;
       this.success = false;
@@ -350,11 +410,17 @@ export default {
           throw new Error('Preço inválido');
         }
 
+        if (this.formData.isRecurrent && (!this.formData.recurrenceDay || this.formData.recurrenceDay < 1 || this.formData.recurrenceDay > 31)) {
+          throw new Error('Dia de recorrência deve ser entre 1 e 31');
+        }
+
         const payload = {
           accountName: this.formData.accountName,
           price: priceValue,
           vencimentDay: this.formData.vencimentDay,
-          paymentStatus: this.formData.paymentStatus
+          paymentStatus: this.formData.paymentStatus,
+          isRecurrent: this.formData.isRecurrent,
+          recurrenceDay: this.formData.isRecurrent ? this.formData.recurrenceDay : null
         };
 
         const response = await fetch(`${API_BASE_URL}/financials`, {

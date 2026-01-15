@@ -1,12 +1,12 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsUrl } from "class-validator";
+import { IsDateString, IsNotEmpty, IsOptional, IsUrl, IsString } from "class-validator";
 
 export class CreateClientDto {
     @IsNotEmpty()
     name: string;
-    
+
     @IsNotEmpty()
     phone: string;
-    
+
     @IsDateString()
     birthday: string | Date;
 
@@ -15,6 +15,9 @@ export class CreateClientDto {
 
     @IsOptional()
     @IsUrl()
-    clientPicture?: string
+    clientPicture?: string;
 
+    @IsOptional()
+    @IsString()
+    observations?: string;
 }

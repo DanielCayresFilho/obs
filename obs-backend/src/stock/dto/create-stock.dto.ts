@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 import { StockType } from '@prisma/client'
 
 
@@ -9,21 +9,28 @@ export class CreateStockDto {
 
     @IsNotEmpty()
     type: StockType;
-    
-    @IsNumber({maxDecimalPlaces: 2})
+
+    @IsNumber({ maxDecimalPlaces: 2 })
     price: number;
+
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 })
+    costPrice?: number;
+
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 })
+    salePrice?: number;
 
     @IsNumber()
     quantity: number;
-    
-    @IsNumber({maxDecimalPlaces: 2})
+
+    @IsNumber({ maxDecimalPlaces: 2 })
     length: number;
 
-    @IsNumber({maxDecimalPlaces: 2})
+    @IsNumber({ maxDecimalPlaces: 2 })
     usable: number;
 
     @IsNotEmpty()
     category: string
-
 
 }

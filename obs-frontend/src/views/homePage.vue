@@ -115,6 +115,16 @@
 />
     </div>
 
+    <div class="div11">
+      <button @click="showBudgetModal = true" class="orcamento">+ NOVO ORÇAMENTO</button>
+       
+      <NewBudgetModal 
+        :isOpen="showBudgetModal" 
+        @close="showBudgetModal = false"
+        @budget-created="handleBudgetCreated"
+      />
+    </div>
+
     <div class="div10">
       <h1 class="titulos">Notificações</h1>
 
@@ -521,6 +531,8 @@ import NewClientModal from '@/components/NewClientModal.vue';
 
 import NewAppointmentModal from '@/components/NewAppointmentModal.vue';
 
+import NewBudgetModal from '@/components/NewBudgetModal.vue';
+
 </script>
 
 <script>
@@ -543,7 +555,8 @@ export default {
       chart: null,
       userId: null,
       showModal: false,
-      showAppointmentModal: false
+      showAppointmentModal: false,
+      showBudgetModal: false
     }
   },
   
@@ -772,7 +785,10 @@ export default {
     handleAppointmentCreated(command) {
   console.log('Agendamento criado:', command);
   this.fetchData(); // Recarrega os dados
-}
+},
+    handleBudgetCreated(budget) {
+      console.log('Orçamento criado:', budget);
+    }
   }
 }
 </script>

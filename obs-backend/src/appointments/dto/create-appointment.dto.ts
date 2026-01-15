@@ -1,9 +1,20 @@
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsDateString, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl } from 'class-validator';
 
 export class CreateAppointmentDto {
   @IsString()
   @IsNotEmpty()
-  procedure: string;
+  tattooStyle: string;
+
+  @IsOptional()
+  @IsInt()
+  estimatedTime?: number;
+
+  @IsOptional()
+  @IsString()
+  bodyLocation?: string;
+
+  @IsNumber({ maxDecimalPlaces: 2 })
+  totalPrice: number;
 
   @IsDateString()
   @IsNotEmpty()
@@ -11,5 +22,9 @@ export class CreateAppointmentDto {
 
   @IsOptional()
   @IsUrl()
-  appointmentPicture?: string
+  appointmentPicture?: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  commandId: number;
 }
