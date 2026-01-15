@@ -24,7 +24,7 @@ RUN npx prisma generate
 
 # Build da aplicação NestJS
 RUN npm run build
-RUN ls -la dist/
+RUN ls -R dist/
 
 # Expor porta
 EXPOSE 3000
@@ -34,4 +34,5 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Comando para iniciar em produção
-CMD ["node", "dist/main.js"]
+# O compilador incluiu a pasta src dentro de dist por causa do prisma/seed.ts
+CMD ["node", "dist/src/main.js"]
