@@ -14,7 +14,6 @@ async function main() {
   await prisma.budgets.deleteMany({});
   await prisma.sales.deleteMany({});
   await prisma.financials.deleteMany({});
-  await prisma.procedures.deleteMany({});
   await prisma.stock.deleteMany({});
   await prisma.clients.deleteMany({});
   await prisma.users.deleteMany({});

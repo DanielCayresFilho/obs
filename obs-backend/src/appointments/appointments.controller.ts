@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
@@ -21,17 +20,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('appointments')
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/commands/:commandId/appointments')
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
   create(
-    @Param('commandId', ParseIntPipe) commandId: number,
     @Body() createAppointmentDto: CreateAppointmentDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.appointmentsService.create(commandId, createAppointmentDto, file );
+    return this.appointmentsService.create(createAppointmentDto, file);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -71,26 +69,25 @@ export class AppointmentsController {
 
 
   @UseGuards(JwtAuthGuard)
-      @Put(':id/profile-pic')
-      @UseInterceptors(
-        FileInterceptor('file', {
-          limits: { fileSize: 1024 * 1024 * 15 }, 
-          fileFilter: (req, file, cb) => {
-            if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-              return cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
-            }
-            cb(null, true);
-          },
-        }),
-      )
-      async uploadProfilePic(
-        @Param('id', ParseIntPipe) clientId: number, 
-        @UploadedFile() file: Express.Multer.File, 
-      ) {
-        if (!file) {
-          throw new BadRequestException('Nenhum arquivo enviado.');
+  @Put(':id/photo')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 1024 * 1024 * 15 },
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+          return cb(new Error('Apenas arquivos de imagem são permitidos!'), false);
         }
-        // Apenas chama o serviço para fazer todo o trabalho pesado
-        return this.appointmentsService.updateProfilePic(clientId, file);
-      }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadPhoto(
+    @Param('id', ParseIntPipe) appointmentId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Nenhum arquivo enviado.');
+    }
+    return this.appointmentsService.updateProfilePic(appointmentId, file);
+  }
 }

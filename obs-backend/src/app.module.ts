@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { StockModule } from './stock/stock.module';
 import { StockMovementModule } from './stock-movement/stock-movement.module';
-import { ProceduresModule } from './procedures/procedures.module';
 import { CommandsModule } from './commands/commands.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { FinancialsModule } from './financials/financials.module';
@@ -16,8 +15,9 @@ import { SalesModule } from './sales/sales.module';
 import { BudgetsModule } from './budgets/budgets.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, ClientsModule, StockModule, StockMovementModule, ProceduresModule, CommandsModule, AppointmentsModule, FinancialsModule, AnalyticsModule, SalesModule, BudgetsModule],
+  imports: [UsersModule, AuthModule, ClientsModule, StockModule, StockMovementModule, CommandsModule, AppointmentsModule, FinancialsModule, AnalyticsModule, SalesModule, BudgetsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
-export class AppModule {}
+export class AppModule { }
+
