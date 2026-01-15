@@ -25,7 +25,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Remover devDependencies após build para imagem menor
-RUN npm prune --production
+RUN npm prune --omit=dev --legacy-peer-deps
 
 # Expor porta
 EXPOSE 3000
