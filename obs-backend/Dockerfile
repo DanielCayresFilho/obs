@@ -2,7 +2,7 @@
 # Dockerfile para Backend - Produção (Coolify)
 # ============================================
 
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Instalar dependências necessárias para o bcrypt
 RUN apk add --no-cache python3 make g++
