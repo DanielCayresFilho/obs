@@ -24,6 +24,7 @@ RUN npx prisma generate
 
 # Build da aplicação NestJS
 RUN npm run build
+RUN ls -la dist/
 
 # Expor porta
 EXPOSE 3000
@@ -33,5 +34,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Comando para iniciar em produção
-# Usamos node dist/main.js diretamente pois é mais leve que npm run start:prod
 CMD ["node", "dist/main.js"]
