@@ -39,11 +39,12 @@ export class AppointmentsService {
       photoUrl = await this.storageService.uploadFile(file, fileName);
     }
 
-    const { commandId, ...appointmentData } = createAppointmentDto;
+    const { commandId, appointmentDate, ...appointmentData } = createAppointmentDto;
 
     return this.prisma.appointments.create({
       data: {
         ...appointmentData,
+        appointmentDate: new Date(appointmentDate),
         appointmentPicture: photoUrl,
         command: {
           connect: {
